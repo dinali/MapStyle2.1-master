@@ -28,40 +28,54 @@
 @synthesize tocViewController = _tocViewController;
 @synthesize popOverController = _popOverController;
 @synthesize dynamiclayerID = _dynamiclayerID;
+@synthesize activityIndicator = _activityIndicator;
+@synthesize activityLabel = _activityLabel;
+@synthesize notificationLabel = _notificationLabel;
 
 #define kTiledLayerURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/Background_Cache/MapServer"
 #define kDynamicMapServiceURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/snap_Benefits/MapServer"
 #define kMapServiceURL @"http://gis2.ers.usda.gov/ArcGIS/rest/services/Reference2/MapServer" // states
 
-//// if the user selected a different layer, pass back the new layerID for the legend and callout
-////- (id)initWithMapView:(AGSMapView *)mapView
-//- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil;
-//{
-//    self = [super initWithNibName:@"MainViewController" bundle:nil];
-//    if (self) {
-//        
-//        //assign the mapView
-//        //self.mapView = mapView;
-//        
-//        //process the map layers.
-//        //[self processMapLayers];
-//        
-//        //create the map level layer info object with id of -2 and layer view as nil.
-//        //self.mapViewLevelLayerInfo = [[AGSMapServiceLayerInfo alloc] initWithLayer:nil layerID:-2 name:@"Map" target:nil];
-//    }
-//    return self;
-//}
 
+// occurs After viewDidLoad
 - (void) viewWillAppear:(BOOL)animated {
-  //  NSLog(@"receiving dynamicLayer = %d", _dynamiclayerID);
+    //[[UIApplication sharedApplication].networkActivityIndicatorVisible]=YES;
+       
+    NSLog(@"viewWillAppear called");
 }
 
+- (void) viewDidAppear:(BOOL)animated{
+    NSLog(@"viewDidAppear called");
+   
+}
+
+- (void) viewDidDisappear:(BOOL)animated{
+     NSLog(@"viewDidDisappear called");
+}
 
 - (void)viewDidLoad {
-    [super viewDidLoad];    
+    [super viewDidLoad];
+    
+   // NSLog(@"viewDidLoad");
+    
+    _activityIndicator.hidden= NO;
+    [_activityIndicator startAnimating];
+    
+    // this hard codes the length of time to display the indicator, that's not such a good approach because the network time might vary; this is the only place it works to call the displayIndicator
+    [self performSelector:@selector(displayIndicator)withObject:nil afterDelay:15.0]; // 10 seconds
 
     //create the toc view controller, toc view controller changes visibility of the mapView without calling this viewDidLoad method
     self.tocViewController = [[TOCViewController alloc] initWithMapView:self.mapView];
+    
+    // check to see if there's internet connection
+    Boolean wifiBoolean = [self checkForInternet];
+    
+    if((wifiBoolean = TRUE)){
+        NSLog(@"got wifi, check next service");
+    }
+    else{
+        NSLog(@"no wifi available");
+    }
     
     // Calls method that adds the layer to the legend each time layer is loaded
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
@@ -139,6 +153,69 @@
     
     self.mapView.showMagnifierOnTapAndHold = YES;
     self.mapView.allowMagnifierToPanMap = YES;
+   
+}
+
+// check for wifi
+-(Boolean) checkForInternet{
+    
+    __block Boolean responseBoolean = FALSE;
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(reachabilityChanged:)
+                                                 name:kReachabilityChangedNotification
+                                               object:nil];
+    
+    // should check availability of all 3 services??
+    Reachability * reach = [Reachability reachabilityWithHostname:kTiledLayerURL];
+    
+    //  Reachability * reach = [Reachability reachabilityWithHostname:@"www.api.ers.usda.gov/REST/v1/charts/mostrecent/1/"];
+    //  Reachability * reach = [Reachability reachabilityWithHostname:@"www.ers.usda.gov"];
+    
+    reach.reachableBlock = ^(Reachability * reachability)
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            _activityLabel.text = @"internet connection is available";
+            responseBoolean = TRUE;
+        });
+        
+    };
+    
+    reach.unreachableBlock = ^(Reachability * reachability)
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            _activityLabel.text = @"internet connection is not available";
+            responseBoolean = FALSE;
+        });
+    };
+    
+    [reach startNotifier];
+    return responseBoolean;
+}
+
+-(void)reachabilityChanged:(NSNotification*)note
+{
+    Reachability * reach = [note object];
+    
+    if([reach isReachable])
+    {
+        _notificationLabel.text = @"Notification Says Reachable";
+    }
+    else
+    {
+        _notificationLabel.text = @"Notification Says Unreachable";
+    }
+}
+#pragma mark -
+#pragma mark UIActivityIndicatorView
+
+// had to be higher in the stack because it's covered as the layers are loaded
+-(void) displayIndicator{
+    
+   // _activityLabel.text = @"please wait, map is loading...";
+    [_activityIndicator stopAnimating];
+   // _activityIndicator.hidesWhenStopped = YES;
+    _activityLabel.hidden = YES;
+    NSLog(@"displayIndicator");
 }
 
 #pragma mark -
@@ -150,8 +227,10 @@
 	[self.legendDataSource addLegendForLayer:(AGSLayer *)notification.object];
 }
 
+// not called
 - (void) mapViewDidLoad:(AGSMapView *) mapView {
-   // NSLog(@"loaded mapView");
+    NSLog(@"loaded mapView");
+    //[_activityIndicator stopAnimating];
 }
 
 #pragma mark - show the associated table view depending on which button was clicked
@@ -414,6 +493,9 @@
 - (void)viewDidUnload {
 
     [self setLegendButton:nil];
+    [self setActivityLabel:nil];
+    [self setActivityIndicator:nil];
+    [self setNotificationLabel:nil];
     [super viewDidUnload];
 	self.mapView = nil;
 	self.infoButton = nil;

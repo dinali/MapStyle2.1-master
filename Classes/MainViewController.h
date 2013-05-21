@@ -19,6 +19,7 @@
 #import <ArcGIS/ArcGIS.h>
 #import "LegendDataSource.h"
 #import "LegendViewController.h"
+#import "Reachability.h"
 
 @interface MainViewController : UIViewController <AGSMapViewLayerDelegate, AGSLocatorDelegate, AGSCalloutDelegate, AGSMapViewTouchDelegate, AGSIdentifyTaskDelegate> {
     
@@ -65,11 +66,16 @@
 //this is the map level layer info object, acting as the invisible root of the entire tree.
 //@property (nonatomic, strong) AGSMapServiceLayerInfo *mapViewLevelLayerInfo;
 @property NSInteger *dynamiclayerID;
+@property (strong, nonatomic) IBOutlet UILabel *notificationLabel;
+
+
+// display the activity indicator Map is Loading
+@property (strong, nonatomic) IBOutlet UILabel *activityLabel;
+@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 - (IBAction)presentTableOfContents:(id)sender;  // display layers
 - (IBAction)presentLegendViewController:(id)sender; // display legend
 
-//- (id)initWithMapView:(AGSMapView *)mapView;
 
 @end
 

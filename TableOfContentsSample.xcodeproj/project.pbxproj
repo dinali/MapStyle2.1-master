@@ -17,6 +17,8 @@
 		28D7ACF80DDB3853001CB0EB /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* MainViewController.m */; };
 		3B7F19E910D1BEB900AFD7FB /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B7F19E810D1BEB900AFD7FB /* CoreLocation.framework */; };
 		3B7F19EB10D1BEB900AFD7FB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B7F19EA10D1BEB900AFD7FB /* QuartzCore.framework */; };
+		968FA525174C0B1700FF8DDE /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 968FA524174C0B1700FF8DDE /* Reachability.m */; };
+		968FA527174C154600FF8DDE /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 968FA526174C154600FF8DDE /* SystemConfiguration.framework */; };
 		9698FD22173BDADD00CA5895 /* PopUpResultsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9698FD21173BDADD00CA5895 /* PopUpResultsViewController.xib */; };
 		969A55EE173ACB8F001D0BC2 /* erslogo_orig.png in Resources */ = {isa = PBXBuildFile; fileRef = 969A55ED173ACB8F001D0BC2 /* erslogo_orig.png */; };
 		969A770516FCB15B00851F40 /* ArcGIS.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 969A770416FCB15B00851F40 /* ArcGIS.bundle */; };
@@ -65,6 +67,9 @@
 		3B7F19E810D1BEB900AFD7FB /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		3B7F19EA10D1BEB900AFD7FB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* TableOfContentsSample-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TableOfContentsSample-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		968FA523174C0B1700FF8DDE /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
+		968FA524174C0B1700FF8DDE /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		968FA526174C154600FF8DDE /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		9698FD21173BDADD00CA5895 /* PopUpResultsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PopUpResultsViewController.xib; sourceTree = "<group>"; };
 		969A55ED173ACB8F001D0BC2 /* erslogo_orig.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = erslogo_orig.png; sourceTree = "<group>"; };
 		969A770416FCB15B00851F40 /* ArcGIS.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = ArcGIS.bundle; sourceTree = "<group>"; };
@@ -110,6 +115,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				968FA527174C154600FF8DDE /* SystemConfiguration.framework in Frameworks */,
 				97B8C41816786182003B6E1B /* OpenGLES.framework in Frameworks */,
 				97B8C4161678617C003B6E1B /* libc++.dylib in Frameworks */,
 				9702E5431446527000A46CA5 /* Security.framework in Frameworks */,
@@ -189,6 +195,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				968FA526174C154600FF8DDE /* SystemConfiguration.framework */,
 				97B8C41716786182003B6E1B /* OpenGLES.framework */,
 				97B8C4151678617C003B6E1B /* libc++.dylib */,
 				9702E53B1446526400A46CA5 /* libz.dylib */,
@@ -234,6 +241,8 @@
 		C56B411814D8C297003A46EB /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				968FA523174C0B1700FF8DDE /* Reachability.h */,
+				968FA524174C0B1700FF8DDE /* Reachability.m */,
 				969C0C011734392F00FC6E79 /* LegendDataSource.h */,
 				969C0C021734392F00FC6E79 /* LegendDataSource.m */,
 				C5B80C0214BD1CD300E3703E /* LayerInfo.h */,
@@ -351,6 +360,7 @@
 				969C0BE81734087600FC6E79 /* ResultsViewController.m in Sources */,
 				969C0C031734392F00FC6E79 /* LegendDataSource.m in Sources */,
 				969C0C071734395D00FC6E79 /* LegendViewController.m in Sources */,
+				968FA525174C0B1700FF8DDE /* Reachability.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

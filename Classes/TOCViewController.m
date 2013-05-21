@@ -133,20 +133,35 @@
     
     //set the visibility of the layer info. 
     [layerInfo setVisible:visibility];
-    
-   // MainViewController *testViewController = [[MainViewController alloc] init];
-   // testViewController.dynamiclayerID = 5;
                                                                         
 }
 
 #pragma mark -
 #pragma mark Helper Methods
 
+// DESCRIPTION: this is where the layer is actually inserted into the TOC; also see ProcessMapLayers
 - (void)insertLayer:(AGSLayer*)layer atIndex:(int)index
 {
     //creates the layer info node for a layer in the map after it is loaded in the map view. and the delegate method is called after the tree is constructed. 
      LayerInfo *layerInfo = [[LayerInfo alloc] initWithLayer:layer layerID:-1 name:layer.name target:self];
-    [self.mapViewLevelLayerInfo insertChild:layerInfo atIndex:index];
+    
+    // delete the Search, States, and Base maps so they don't appear in the Table of Contents - doesn't make a difference here
+    
+    NSLog(@"layerInfo name %@ =", layerInfo.layerName);
+    
+    // leave this in case you decide to add one of these back in the TOC
+     /*if (!([layerInfo.layerName isEqualToString: @"Search Layer ="]) ||
+         !([layerInfo.layerName isEqualToString: @"States ="]) ||
+         !([layerInfo.layerName isEqualToString: @"Base Map ="]))
+      */
+    if ([layerInfo.layerName isEqualToString: @"Snap Benefits"])
+     {
+         [self.mapViewLevelLayerInfo insertChild:layerInfo atIndex:0];
+        //[self.mapViewLevelLayerInfo insertChild:layerInfo atIndex:index];
+    }
+    else{
+        NSLog(@"found one of the bad layers");
+    }
 }
 
 - (void)doneButtonPressed {
@@ -196,8 +211,8 @@
                                           canChangeVisibility:layerInfo.canChangeVisibility
                                                    visibility:layerInfo.visible
                                                      expanded:layerInfo.inclusive];   
-        
-        //assign the title. 
+      
+        //assign the title.
         layerInfoCell.valueLabel.text = layerInfo.layerName;
         
         //assign the delegate to call the method when the visibility is changed. 
@@ -230,7 +245,6 @@
 }
 
 
-
 #pragma mark -
 #pragma mark Table view delegate
 
@@ -254,7 +268,7 @@
 
 #pragma mark -
 #pragma mark Helper Methods
-
+// DESCRIPTION: this is what loads the map layers into the TOC
 - (void)processMapLayers
 {
     //pruning the tree to remove the layers that are not in the mapview anymore.       
