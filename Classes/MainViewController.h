@@ -68,14 +68,13 @@
 @property NSInteger *dynamiclayerID;
 @property (strong, nonatomic) IBOutlet UILabel *notificationLabel;
 
-
 // display the activity indicator Map is Loading
 @property (strong, nonatomic) IBOutlet UILabel *activityLabel;
 @property (strong, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 - (IBAction)presentTableOfContents:(id)sender;  // display layers
 - (IBAction)presentLegendViewController:(id)sender; // display legend
-
+- (IBAction)showCurrentLocation:(id)sender; // click to display where you are
 
 @end
 

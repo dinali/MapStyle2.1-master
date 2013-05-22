@@ -39,43 +39,44 @@
 
 // occurs After viewDidLoad
 - (void) viewWillAppear:(BOOL)animated {
-    //[[UIApplication sharedApplication].networkActivityIndicatorVisible]=YES;
        
     NSLog(@"viewWillAppear called");
 }
 
-- (void) viewDidAppear:(BOOL)animated{
-    NSLog(@"viewDidAppear called");
-   
-}
-
-- (void) viewDidDisappear:(BOOL)animated{
-     NSLog(@"viewDidDisappear called");
+- (IBAction)showCurrentLocation
+{
+    [self.mapView centerAtPoint:[self.mapView.locationDisplay mapLocation] animated:YES];
+    self.mapView.locationDisplay.autoPanMode = AGSLocationDisplayAutoPanModeDefault;
+    NSLog(@"showCurrentLocation");
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-   // NSLog(@"viewDidLoad");
-    
-    _activityIndicator.hidden= NO;
-    [_activityIndicator startAnimating];
-    
-    // this hard codes the length of time to display the indicator, that's not such a good approach because the network time might vary; this is the only place it works to call the displayIndicator
-    [self performSelector:@selector(displayIndicator)withObject:nil afterDelay:15.0]; // 10 seconds
-
-    //create the toc view controller, toc view controller changes visibility of the mapView without calling this viewDidLoad method
-    self.tocViewController = [[TOCViewController alloc] initWithMapView:self.mapView];
-    
-    // check to see if there's internet connection
+    // CHECK internet connection
     Boolean wifiBoolean = [self checkForInternet];
     
     if((wifiBoolean = TRUE)){
-        NSLog(@"got wifi, check next service");
+        NSLog(@"accessed ERS map service");
+        
+        // THEN ADD THE REST OF THE LOADING CODE BELOW
     }
     else{
         NSLog(@"no wifi available");
     }
+    
+    // MAP IS LOADING
+    
+    _activityIndicator.hidden= NO;
+    [_activityIndicator startAnimating];
+    
+    // MAP IS LOADING:this hard codes the length of time to display the indicator, that's not such a good approach because the network time might vary; this is the only place it works to call the displayIndicator
+    [self performSelector:@selector(displayIndicator)withObject:nil afterDelay:20.0]; // 10 seconds
+    
+    // LOAD LAYERS
+
+    //create the toc view controller, toc view controller changes visibility of the mapView without calling this viewDidLoad method
+    self.tocViewController = [[TOCViewController alloc] initWithMapView:self.mapView];
     
     // Calls method that adds the layer to the legend each time layer is loaded
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(respondToLayerLoaded:) name:AGSLayerDidLoadNotification object:nil];
@@ -101,7 +102,9 @@
         layer.opacity = .8;
     } 
     
+    //NSLog(@"before adding Snap layer");
     [self.mapView addMapLayer:layer withName:@"Snap Benefits"];
+    //NSLog(@"after adding Snap layer");
     
     NSURL *stateMapUrl = [NSURL URLWithString:kMapServiceURL];
     AGSDynamicMapServiceLayer *dynamicLyr = [AGSDynamicMapServiceLayer dynamicMapServiceLayerWithURL:stateMapUrl];
@@ -127,7 +130,7 @@
     self.graphicsLayer = [AGSGraphicsLayer graphicsLayer];
     [self.mapView addMapLayer:self.graphicsLayer withName:@"Search Layer"];
     
-    // current location marker: user's current location as starting point
+    // CURRENT LOCATION marker: user's current location as starting point
     [self.mapView.locationDisplay startDataSource];
     
 	// LEGEND: a data source that will hold the legend items
@@ -153,10 +156,12 @@
     
     self.mapView.showMagnifierOnTapAndHold = YES;
     self.mapView.allowMagnifierToPanMap = YES;
-   
 }
 
-// check for wifi
+#pragma mark -
+#pragma mark Check for Internet
+
+// ONLY CHECK ERS, assumes ESRI will be available
 -(Boolean) checkForInternet{
     
     __block Boolean responseBoolean = FALSE;
@@ -165,30 +170,26 @@
                                                  name:kReachabilityChangedNotification
                                                object:nil];
     
-    // should check availability of all 3 services??
-    Reachability * reach = [Reachability reachabilityWithHostname:kTiledLayerURL];
-    
-    //  Reachability * reach = [Reachability reachabilityWithHostname:@"www.api.ers.usda.gov/REST/v1/charts/mostrecent/1/"];
-    //  Reachability * reach = [Reachability reachabilityWithHostname:@"www.ers.usda.gov"];
+    Reachability * reach = [Reachability reachabilityWithHostname:kDynamicMapServiceURL];
     
     reach.reachableBlock = ^(Reachability * reachability)
     {
         dispatch_async(dispatch_get_main_queue(), ^{
-            _activityLabel.text = @"internet connection is available";
+            //_notificationLabel.text = @"ERS map service is available";
             responseBoolean = TRUE;
-        });
-        
+        });        
     };
     
     reach.unreachableBlock = ^(Reachability * reachability)
     {
         dispatch_async(dispatch_get_main_queue(), ^{
-            _activityLabel.text = @"internet connection is not available";
+           // _notificationLabel.text = @"ERS map service is not available";
             responseBoolean = FALSE;
         });
     };
     
     [reach startNotifier];
+   // NSLog(@"in reachability");
     return responseBoolean;
 }
 
@@ -198,24 +199,21 @@
     
     if([reach isReachable])
     {
-        _notificationLabel.text = @"Notification Says Reachable";
+        _notificationLabel.text = @"ERS map service is available";
     }
     else
     {
-        _notificationLabel.text = @"Notification Says Unreachable";
+        _notificationLabel.text = @"ERS map service is not available";
     }
 }
 #pragma mark -
-#pragma mark UIActivityIndicatorView
+#pragma mark Map is Loading:UIActivityIndicatorView
 
-// had to be higher in the stack because it's covered as the layers are loaded
+// stop the spinner for map is loading
 -(void) displayIndicator{
     
-   // _activityLabel.text = @"please wait, map is loading...";
     [_activityIndicator stopAnimating];
-   // _activityIndicator.hidesWhenStopped = YES;
     _activityLabel.hidden = YES;
-    NSLog(@"displayIndicator");
 }
 
 #pragma mark -
@@ -227,15 +225,11 @@
 	[self.legendDataSource addLegendForLayer:(AGSLayer *)notification.object];
 }
 
-// not called
-- (void) mapViewDidLoad:(AGSMapView *) mapView {
-    NSLog(@"loaded mapView");
-    //[_activityIndicator stopAnimating];
-}
 
 #pragma mark - show the associated table view depending on which button was clicked
 
 // sample code used a popOverController for the iPad, but it got confusing when both the legend and TOC are available.
+// TODO: comment out when the other bug has been eliminated
 - (IBAction)presentTableOfContents:(id)sender
 {
     //If iPad, show legend in the PopOver, else transition to the separate view controller
@@ -250,11 +244,12 @@
 	}
     else {
 		[self presentModalViewController:self.tocViewController animated:YES];
-	} 
-     */
+	}
+    */
     [self presentModalViewController:self.tocViewController animated:YES];
 }
 
+// OBSOLETE because the legend is visible in the Layers
 - (IBAction) presentLegendViewController: (id) sender{
 	//If iPad, show legend in the PopOver, else transition to the separate view controller
 	/*if([[AGSDevice currentDevice] isIPad]){
@@ -265,10 +260,8 @@
             self.popOverController.passthroughViews = [NSArray arrayWithObject:self.view];
         }
 		[self.popOverController presentPopoverFromRect:self.legendButton.frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES ];
-        }
-    */
-    /*
-        else {
+    }
+    else {
 		[self presentModalViewController:self.legendViewController animated:YES];
 	}
     */
@@ -395,7 +388,7 @@
     
 }
 
-#pragma mark - AGSCalloutDelegate methods
+#pragma mark - Show location data in popup:AGSCalloutDelegate methods
 
 - (void)mapView:(AGSMapView *)mapView didClickAtPoint:(CGPoint)screen mapPoint:(AGSPoint *)mappoint graphics:(NSDictionary *)graphicsDict {
     
@@ -417,8 +410,8 @@
 }
 
 
-#pragma mark - AGSIdentifyTaskDelegate methods
-//results are returned
+#pragma mark - Display Callout:AGSIdentifyTaskDelegate methods
+
 - (void)identifyTask:(AGSIdentifyTask *)identifyTask operation:(NSOperation *)op didExecuteWithIdentifyResults:(NSArray *)results {
     
     //clear previous results
@@ -506,4 +499,6 @@
 
 
 
+- (IBAction)showCurrentLocation:(id)sender {
+}
 @end
